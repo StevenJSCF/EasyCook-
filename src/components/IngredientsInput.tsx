@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Search } from "lucide-react";
+import GeneratedRecipes from "./GeneratedRecipes";
 
 type Props = {};
 
@@ -36,7 +37,7 @@ const IngredientsInput = (props: Props) => {
           app_key: process.env.EDAMAM_APP_KEY,
         },
       });
-      setSearchResults(response.data);
+      setSearchResults(response.data.slice(0, 5));
     } catch (error) {
       console.error("Error fetching ingredients:", error);
       setSearchResults([]);
@@ -52,22 +53,28 @@ const IngredientsInput = (props: Props) => {
 
   const generateRecipe = async () => {
     try {
-      console.log("Debugging ingredientsList: ", ingredientsList);
       const response = await axios.post("/api/generate-recipe", {
         ingredients: ingredientsList,
       });
-      console.log(response.data);
-      setRecipe(response.data.recipe);
+
+      const ai_text_response = response.data.data.choices[0].text;
+      // Logging the entire response to understand its structure
+      console.log("API text Response:", ai_text_response);
+
+      setRecipe(ai_text_response);
     } catch (error: any) {
-      console.error("Error generating recipe:", error.response.data);
+      console.error(
+        "Error generating recipe:",
+        error.response?.data || error.message
+      );
     }
   };
 
   return (
-    <div className="flex">
-      <div className="flex-box">
+    <div className="relative flex">
+      <div>
         <h2>Search Ingredients:</h2>
-        <div className="flex items-center rounded-full border-2 border-gray-400 p-1">
+        <div className="flex items-center rounded-full border-2 border-gray-400 p-1 mt-2">
           <input
             type="text"
             value={ingredient}
@@ -80,14 +87,18 @@ const IngredientsInput = (props: Props) => {
         {isLoading && <p>Loading...</p>}
         <ul>
           {searchResults.map((result, index) => (
-            <li key={index} onClick={() => handleAddIngredient(result)}>
+            <li
+              key={index}
+              className="cursor-pointer bg-black rounded p-2 hover:bg-gray-300 mt-2"
+              onClick={() => handleAddIngredient(result)}
+            >
               {result}
             </li>
           ))}
         </ul>
       </div>
 
-      <div className="flex-box ml-5">
+      <div className="absolute top-80">
         <h2>Ingredients List:</h2>
         <ul>
           {ingredientsList.map((item, index) => (
@@ -107,13 +118,14 @@ const IngredientsInput = (props: Props) => {
           <p>Your list is empty</p>
         )}
       </div>
-
-      {recipe && (
-        <div className="flex-box mt-5">
-          <h2>Generated Recipe:</h2>
-          <p>{recipe}</p>
-        </div>
-      )}
+      <div className="flex border-2 w-full">
+      <h2 className="ml-96">Generated Recipe:</h2>
+        {recipe != null ? (
+          <GeneratedRecipes recipe={recipe} />
+        ) : (
+          <p>No recipe generated yet.</p>
+        )}
+      </div>
     </div>
   );
 };

@@ -22,21 +22,23 @@ export async function POST(req: NextRequest) {
       {
         "ingredients": ["ingredient1", "ingredient2"],
         "extra_ingredients": ["extra_ingredient1", "extra_ingredient2"],
-        "instructions": "Step 1: ..."
+        "instructions": ["Step 1: ...", "Step 2: ...", "Step 3: ..." ...],
       }
+      -Please only provide the text as shown in the Example, not additional text. 
       `;
       
 
         const response = await openai.createCompletion({
             model: "gpt-3.5-turbo-instruct",
             prompt,
-            max_tokens: 150,
+            max_tokens: 300,
         });
 
         const data = await response.json(); // Parse the JSON response
         // const recipe = data.choices[0].text.trim(); // Extract the recipe text
 
-        console.log('Generated recipe:', data);
+        console.log('Generated recipe:', data.choices[0].text);
+
 
         return NextResponse.json({ data });
     } catch (error) {
