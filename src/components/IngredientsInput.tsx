@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Search } from "lucide-react";
 import GeneratedRecipes from "./GeneratedRecipes";
+import { Button } from "./ui/button";
 
 type Props = {};
 
@@ -12,6 +13,7 @@ const IngredientsInput = (props: Props) => {
   const [ingredientsList, setIngredientsList] = useState<string[]>([]);
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
   const [recipe, setRecipe] = useState<string | null>(null); // State to store the generated recipe
 
   const handleAddIngredient = (ingredient: string) => {
@@ -52,6 +54,7 @@ const IngredientsInput = (props: Props) => {
   }, [ingredient]);
 
   const generateRecipe = async () => {
+    setIsLoadingRecipe(true);
     try {
       const response = await axios.post("/api/generate-recipe", {
         ingredients: ingredientsList,
@@ -60,6 +63,7 @@ const IngredientsInput = (props: Props) => {
       const ai_text_response = response.data.data.choices[0].text;
       // Logging the entire response to understand its structure
       console.log("API text Response:", ai_text_response);
+      setIsLoadingRecipe(false);
 
       setRecipe(ai_text_response);
     } catch (error: any) {
@@ -74,7 +78,7 @@ const IngredientsInput = (props: Props) => {
     <div className="relative flex">
       <div>
         <h2>Search Ingredients:</h2>
-        <div className="flex items-center rounded-full border-2 border-gray-400 p-1 mt-2">
+        <div className="flex items-center rounded-full border-2 border-gray-500 p-1 mt-2">
           <input
             type="text"
             value={ingredient}
@@ -108,23 +112,27 @@ const IngredientsInput = (props: Props) => {
         {ingredientsList.length > 0 ? (
           <div>
             <div>
-              <button onClick={() => setIngredientsList([])}>Clear List</button>
+              <Button onClick={() => setIngredientsList([])}>Clear List</Button>
             </div>
             <div>
-              <button onClick={generateRecipe}>Generate Recipe</button>
+              <Button onClick={generateRecipe}>Generate Recipe</Button>
             </div>
           </div>
         ) : (
           <p>Your list is empty</p>
         )}
       </div>
-      <div className="flex border-2 w-full">
-      <h2 className="ml-96">Generated Recipe:</h2>
-        {recipe != null ? (
-          <GeneratedRecipes recipe={recipe} />
-        ) : (
-          <p>No recipe generated yet.</p>
-        )}
+      <div className="flex flex-col min-h-screen w-full px-10 pt-5">
+        <div className="flex flex-col flex-1 border-2 w-full rounded-lg ">
+          <h2 className="text-center">Generated Recipes:</h2>
+          {isLoadingRecipe ? (
+            <p>Loading recipe...</p>
+          ) : recipe ? (
+            <GeneratedRecipes recipe={recipe} />
+          ) : (
+            <p>No recipe generated yet.</p>
+          )}
+        </div>
       </div>
     </div>
   );
