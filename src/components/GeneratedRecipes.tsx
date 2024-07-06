@@ -15,8 +15,7 @@ const GeneratedRecipes: React.FC<GeneratedRecipesProps> = ({ recipe }) => {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
 
   if (!recipe) {
-    
-    return <p>No recipe generated yet.</p>;
+    return <p>No recipes generated</p>;
   }
 
   let parsedRecipes: Recipe[];
@@ -24,7 +23,7 @@ const GeneratedRecipes: React.FC<GeneratedRecipesProps> = ({ recipe }) => {
   try {
     parsedRecipes = JSON.parse(recipe);
   } catch (error) {
-    return <p>Error parsing recipes.</p>;
+    return <p>There was an error generating th recipes.</p>;
   }
 
   const openModal = (recipe: Recipe) => {
@@ -37,20 +36,22 @@ const GeneratedRecipes: React.FC<GeneratedRecipesProps> = ({ recipe }) => {
 
   return (
     <div className="w-full h-full relative">
-      <div className="grid grid-cols-2 gap-4 w-full h-full">
+      <div className="grid grid-cols-2 gap-4 w-full h-full p-4">
         {parsedRecipes.map((parsedRecipe, index) => (
           <div
             key={index}
-            className="border rounded p-4 cursor-pointer w-full h-full"
+            className="border-2 border-gray-300 rounded-lg cursor-pointer w-full h-full p-4 shadow-lg hover:shadow-xl transition-shadow duration-200"
             onClick={() => openModal(parsedRecipe)}
           >
-            <h3>{parsedRecipe.recipe_name}</h3>
+            <h3 className="text-xl font-bold">{parsedRecipe.recipe_name}</h3>
           </div>
         ))}
       </div>
       {selectedRecipe && (
         <Modal isOpen={!!selectedRecipe} onClose={closeModal}>
-          <h2 className="text-center mb-4 font-bold">{selectedRecipe.recipe_name}</h2>
+          <h2 className="text-center mb-4 font-bold">
+            {selectedRecipe.recipe_name}
+          </h2>
           <div className="flex flex-col space-y-4">
             <div className="flex-1">
               <h4 className="font-bold">Ingredients:</h4>
@@ -61,11 +62,13 @@ const GeneratedRecipes: React.FC<GeneratedRecipesProps> = ({ recipe }) => {
               </ul>
             </div>
             <div className="flex-1">
-              <h4 className = "font-bold">Extra Ingredients:</h4>
+              <h4 className="font-bold">Extra Ingredients:</h4>
               <ul className="list-disc pl-6">
-                {selectedRecipe.extra_ingredients.map((extraIngredient, idx) => (
-                  <li key={idx}>{extraIngredient}</li>
-                ))}
+                {selectedRecipe.extra_ingredients.map(
+                  (extraIngredient, idx) => (
+                    <li key={idx}>{extraIngredient}</li>
+                  )
+                )}
               </ul>
             </div>
             <div className="flex-1">
@@ -83,12 +86,19 @@ const GeneratedRecipes: React.FC<GeneratedRecipesProps> = ({ recipe }) => {
   );
 };
 
-const Modal: React.FC<{ isOpen: boolean; onClose: () => void; children: React.ReactNode }> = ({ isOpen, onClose, children }) => {
+const Modal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}> = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div className="fixed inset-0 bg-gray-800 opacity-75" onClick={onClose}></div>
+      <div
+        className="fixed inset-0 bg-gray-800 opacity-75"
+        onClick={onClose}
+      ></div>
       <div className="bg-white p-6 rounded-lg z-10 max-w-lg w-full mx-4">
         {children}
       </div>
