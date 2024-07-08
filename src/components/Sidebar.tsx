@@ -12,6 +12,10 @@ import {
   Disc,
   AudioLines,
 } from "lucide-react";
+import { UserButton } from "@clerk/nextjs";
+import { useAuth, useClerk } from "@clerk/nextjs";
+import { LogIn } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // Define prop types for MenuItem component
 interface MenuItemProps {
@@ -34,7 +38,9 @@ const MenuItem: FC<MenuItemProps> = ({
 }) => {
   const pathname = usePathname();
   const colorClass =
-    route && pathname === route ? "text-white" : "text-white/50 hover:text-white";
+    route && pathname === route
+      ? "text-white"
+      : "text-white/50 hover:text-white";
 
   return (
     <div className="flex flex-col">
@@ -64,6 +70,16 @@ const Sidebar: FC = () => {
   const className =
     "bg-red-500 w-[250px] h-screen fixed md:static top-0 bottom-0 left-0 z-40 overflow-y-auto";
 
+  const { userId } = useAuth();
+  const isAuth = !!userId;
+  const { user } = useClerk();
+
+  if (user) {
+    console.log("here is the firstname" + user.firstName);
+  }
+
+  //Testing username
+
   return (
     <div className={className}>
       {/* <div className="p-2 flex">
@@ -83,6 +99,18 @@ const Sidebar: FC = () => {
           <MenuItem name="..." route="/playlists/2" icon={<AudioLines />} />
         </MenuItem>
         <MenuItem name="TBD" route="/artists" icon={<UserRoundSearchIcon />} />
+
+        <UserButton />
+        {isAuth && <p>Logged in as {userId}</p>}
+
+        {isAuth ? (
+          <h1>Hello world</h1>
+        ) : (
+          <Link href="/sign-in">
+            <Button>Login to get started</Button>
+            <LogIn className="w-4 h-4 ml-2" />
+          </Link>
+        )}
       </div>
     </div>
   );
