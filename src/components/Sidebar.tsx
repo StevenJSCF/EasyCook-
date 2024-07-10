@@ -1,7 +1,7 @@
 "use client";
 
 // @/components/Layout/Sidebar.tsx
-import React, { useState, FC } from "react";
+import React, { useState,useEffect, FC } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -16,6 +16,7 @@ import { UserButton } from "@clerk/nextjs";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import User from "@/lib/db/schema";
 
 // Define prop types for MenuItem component
 interface MenuItemProps {
@@ -74,20 +75,62 @@ const Sidebar: FC = () => {
   const isAuth = !!userId;
   const { user } = useClerk();
 
-  if (user) {
-    console.log("here is the firstname" + user.firstName);
-  }
+  useEffect(() => {
+    const saveUser = async () => {
 
-  //Testing username
-
+      if (isAuth ) {
+        const newUser = {
+          name: user?.firstName,
+          userId: userId,
+        };
+  
+        try {
+          const res = await fetch("/api/create-user", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newUser),
+          });
+  
+          if (!res.ok) {
+            throw new Error("Failed to save user");
+          }
+  
+          const data = await res.json();
+          console.log("User saved:", data);
+        } catch (error) {
+          console.error("Error saving user:", error);
+        }
+      }
+    };
+  
+    saveUser();
+  }, [user, userId]);
+  
   return (
     <div className={className}>
-      {/* <div className="p-2 flex">
-                <Link href="/">
-                    <img src="https://github.com/StevenJSCF/Images/blob/main/Others/s_logo.png?raw=true" alt="Company Logo" width={150} height={150}/>
-                </Link>
-            </div> */}
       <div className="flex flex-col">
+        <div className="flex">
+          <p className="font-bold text-3xl my-3 ml-7 text-white">
+            Hi {user?.firstName}!
+          </p>
+          <div className="ml-3 mt-5">
+            <UserButton />
+          </div>
+        </div>
+
+        {isAuth ? (
+          <p></p>
+        ) : (
+          <Link href="/sign-in">
+            <Button className="my-3 ml-5">
+              Login to get started
+              <LogIn className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+        )}
+
         <MenuItem name="Home" route="/" icon={<HomeIcon />} />
         <MenuItem
           name="My Meals"
@@ -99,18 +142,6 @@ const Sidebar: FC = () => {
           <MenuItem name="..." route="/playlists/2" icon={<AudioLines />} />
         </MenuItem>
         <MenuItem name="TBD" route="/artists" icon={<UserRoundSearchIcon />} />
-
-        <UserButton />
-        {isAuth && <p>Logged in as {userId}</p>}
-
-        {isAuth ? (
-          <h1>Hello world</h1>
-        ) : (
-          <Link href="/sign-in">
-            <Button>Login to get started</Button>
-            <LogIn className="w-4 h-4 ml-2" />
-          </Link>
-        )}
       </div>
     </div>
   );
