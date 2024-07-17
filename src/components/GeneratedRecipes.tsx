@@ -1,4 +1,6 @@
+// GeneratedRecipes.tsx
 import React, { useState } from "react";
+import Modal from './Modal';  // Adjust the import path as necessary
 
 type Recipe = {
   recipe_name: string;
@@ -23,7 +25,7 @@ const GeneratedRecipes: React.FC<GeneratedRecipesProps> = ({ recipe }) => {
   try {
     parsedRecipes = JSON.parse(recipe);
   } catch (error) {
-    return <p>There was an error generating th recipes.</p>;
+    return <p>There was an error generating the recipes.</p>;
   }
 
   const openModal = (recipe: Recipe) => {
@@ -82,26 +84,6 @@ const GeneratedRecipes: React.FC<GeneratedRecipesProps> = ({ recipe }) => {
           </div>
         </Modal>
       )}
-    </div>
-  );
-};
-
-const Modal: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
-}> = ({ isOpen, onClose, children }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div
-        className="fixed inset-0 bg-gray-800 opacity-75"
-        onClick={onClose}
-      ></div>
-      <div className="bg-white p-6 rounded-lg z-10 max-w-lg w-full mx-4">
-        {children}
-      </div>
     </div>
   );
 };

@@ -22,7 +22,9 @@
     "openai-edge": "^1.2.2",
     "react": "^18",
     "react-dom": "^18",
+    "react-hot-toast": "^2.4.1",
     "react-spinners": "^0.14.1",
+    "svix": "^1.25.0",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7"
   },

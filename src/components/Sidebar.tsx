@@ -1,7 +1,7 @@
 "use client";
 
 // @/components/Layout/Sidebar.tsx
-import React, { useState,useEffect, FC } from "react";
+import React, { useState, useEffect, FC } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -16,7 +16,9 @@ import { UserButton } from "@clerk/nextjs";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import User from "@/lib/db/schema";
+import axios from "axios";
+import { userExist } from "@/lib/actions/profile-action";
+import toast from "react-hot-toast";
 
 // Define prop types for MenuItem component
 interface MenuItemProps {
@@ -75,53 +77,19 @@ const Sidebar: FC = () => {
   const isAuth = !!userId;
   const { user } = useClerk();
 
-  useEffect(() => {
-    const saveUser = async () => {
 
-      if (isAuth ) {
-        const newUser = {
-          name: user?.firstName,
-          userId: userId,
-        };
-  
-        try {
-          const res = await fetch("/api/create-user", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newUser),
-          });
-  
-          if (!res.ok) {
-            throw new Error("Failed to save user");
-          }
-  
-          const data = await res.json();
-          console.log("User saved:", data);
-        } catch (error) {
-          console.error("Error saving user:", error);
-        }
-      }
-    };
-  
-    saveUser();
-  }, [user, userId]);
-  
   return (
     <div className={className}>
       <div className="flex flex-col">
-        <div className="flex">
-          <p className="font-bold text-3xl my-3 ml-7 text-white">
-            Hi {user?.firstName}!
-          </p>
-          <div className="ml-3 mt-5">
-            <UserButton />
-          </div>
-        </div>
-
         {isAuth ? (
-          <p></p>
+          <div className="flex">
+            <p className="font-bold text-3xl my-3 ml-7 text-white">
+              Hi {user?.firstName}!
+            </p>
+            <div className="ml-3 mt-5">
+              <UserButton />
+            </div>
+          </div>
         ) : (
           <Link href="/sign-in">
             <Button className="my-3 ml-5">
