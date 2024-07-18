@@ -1,24 +1,22 @@
 "use client";
-
-// @/components/Layout/Sidebar.tsx
 import React, { useState, useEffect, FC } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   HomeIcon,
-  UserRoundSearchIcon,
+  Settings,
   ChevronRight,
   ChevronDown,
-  Disc,
+  UserRoundCog,
   AudioLines,
+  LogIn,
 } from "lucide-react";
-import { UserButton } from "@clerk/nextjs";
-import { useAuth, useClerk } from "@clerk/nextjs";
-import { LogIn } from "lucide-react";
+import { UserButton, useAuth, useClerk } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
-import { userExist } from "@/lib/actions/profile-action";
 import toast from "react-hot-toast";
+import FirstLogin from "@/components/FirstLogin";
+import { getUserById } from "@/lib/actions/user-action";
 
 // Define prop types for MenuItem component
 interface MenuItemProps {
@@ -69,6 +67,8 @@ const MenuItem: FC<MenuItemProps> = ({
 // Define Sidebar component
 const Sidebar: FC = () => {
   const [isPlaylistOpen, setPlaylistOpen] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   const className =
     "bg-red-500 w-[250px] h-screen fixed md:static top-0 bottom-0 left-0 z-40 overflow-y-auto";
@@ -77,6 +77,26 @@ const Sidebar: FC = () => {
   const isAuth = !!userId;
   const { user } = useClerk();
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get("/api/getProfile");
+        console.log("response data", response.data);
+        setProfile(response.data);
+      } catch (error) {
+        toast.error("Failed to fetch user data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [isAuth]);
+
+  useEffect(() => {
+    if (!loading && profile !== null) {
+      toast.success("Welcome back!");
+    }
+  }, [loading]);
 
   return (
     <div className={className}>
@@ -89,6 +109,7 @@ const Sidebar: FC = () => {
             <div className="ml-3 mt-5">
               <UserButton />
             </div>
+            {!loading && profile === null ? <FirstLogin /> : null}
           </div>
         ) : (
           <Link href="/sign-in">
@@ -101,15 +122,19 @@ const Sidebar: FC = () => {
 
         <MenuItem name="Home" route="/" icon={<HomeIcon />} />
         <MenuItem
-          name="My Meals"
+          name="Edit Profile"
+          route="/artists"
+          icon={<UserRoundCog />}
+        />
+        <MenuItem
+          name="Settings"
           onClick={() => setPlaylistOpen(!isPlaylistOpen)}
-          icon={<Disc />}
+          icon={<Settings /> }
           isOpen={isPlaylistOpen}
         >
           <MenuItem name="..." route="/playlists/1" icon={<AudioLines />} />
           <MenuItem name="..." route="/playlists/2" icon={<AudioLines />} />
         </MenuItem>
-        <MenuItem name="TBD" route="/artists" icon={<UserRoundSearchIcon />} />
       </div>
     </div>
   );

@@ -6,9 +6,11 @@ import { createUserProfile } from "@/lib/actions/profile-action";
 import { UserProfileParams } from "@/lib/database/models/profile-model";
 import { useAuth } from "@clerk/nextjs";
 import { NextRequest, NextResponse } from "next/server";
+import { getAuth } from "@clerk/nextjs/server"
 
 export async function POST(req: NextRequest, res: NextResponse) {
-  const { userId } = await useAuth();
+  // const { userId } = await useAuth();
+  const { userId } = getAuth(req)
   const { userProfile } = await req.json();
 
   if (!userId) {
@@ -32,4 +34,3 @@ export async function POST(req: NextRequest, res: NextResponse) {
     );
   }
 }
-
