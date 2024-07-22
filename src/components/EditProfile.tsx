@@ -1,6 +1,8 @@
+// components/EditProfile.tsx
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, FC } from "react";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -9,21 +11,45 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { handleError } from "@/lib/utils";
 
-const EditProfile = () => {
+// Define props for EditProfile component
+interface EditProfileProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const EditProfile: FC<EditProfileProps> = ({ isOpen, onClose }) => {
   const router = useRouter();
   const [dislikedFood, setDislikedFood] = useState("");
   const [allergies, setAllergies] = useState("");
   const [cuisinePreference, setCuisinePreference] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const { userId } = useAuth();
   const isAuth = !!userId;
 
-  const {user} = useClerk(); 
+  const { user } = useClerk();
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get("/api/get-profile");
+        const { disliked_food, allergies, cuisine_preference } = response.data;
+        setDislikedFood(disliked_food);
+        setAllergies(allergies);
+        setCuisinePreference(cuisine_preference);
+      } catch (error) {
+        toast.error("Failed to fetch user data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [isAuth]);
 
-  async function onSumit() {
-    const values = {
+  async function onSumit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault(); // Prevents the default form submission behavior
+    
+      const values = {
       userId: userId,
       disliked_food: dislikedFood,
       allergies: allergies,
@@ -31,25 +57,24 @@ const EditProfile = () => {
     };
 
     try {
-      const response = await axios.post("/api/create-profile", {
+      const response = await axios.put("/api/update-profile", {
         userProfile: values,
       });
-      toast.success("Profile created successfully");
+      toast.success("Profile updted successfully");
     } catch (error) {
       console.log("error creating the user profile", error);
       handleError(error);
     }
     console.log(values);
 
-    setIsModalOpen(false);
-    router.push("/");
+    onClose(); // Close the modal after submission
   }
 
   return (
-    <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+    <Modal isOpen={isOpen} onClose={onClose}>
       <div className="p-6">
         <h1 className="text-3xl text-center font-bold mb-4">
-            Hey {user?.firstName}! 
+          Hey {user?.firstName}!
         </h1>
         <p className="text-center mb-4">
           By changing your profile, our AI can generate personalized and

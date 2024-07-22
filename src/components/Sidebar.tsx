@@ -1,3 +1,5 @@
+// components/Sidebar.tsx
+
 "use client";
 import React, { useState, useEffect, FC } from "react";
 import Link from "next/link";
@@ -16,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import toast from "react-hot-toast";
 import FirstLogin from "@/components/FirstLogin";
-import { getUserById } from "@/lib/actions/user-action";
+import EditProfile from "./EditProfile"; // Import the EditProfile component
 
 // Define prop types for MenuItem component
 interface MenuItemProps {
@@ -69,6 +71,7 @@ const Sidebar: FC = () => {
   const [isPlaylistOpen, setPlaylistOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false); // Add state for modal
 
   const className =
     "bg-red-500 w-[250px] h-screen fixed md:static top-0 bottom-0 left-0 z-40 overflow-y-auto";
@@ -80,8 +83,7 @@ const Sidebar: FC = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get("/api/getProfile");
-        console.log("response data", response.data);
+        const response = await axios.get("/api/get-profile");
         setProfile(response.data);
       } catch (error) {
         toast.error("Failed to fetch user data.");
@@ -123,19 +125,22 @@ const Sidebar: FC = () => {
         <MenuItem name="Home" route="/" icon={<HomeIcon />} />
         <MenuItem
           name="Edit Profile"
-          route="/artists"
+          onClick={() => setIsEditProfileOpen(true)} // Open the modal
           icon={<UserRoundCog />}
         />
         <MenuItem
           name="Settings"
           onClick={() => setPlaylistOpen(!isPlaylistOpen)}
-          icon={<Settings /> }
+          icon={<Settings />}
           isOpen={isPlaylistOpen}
         >
           <MenuItem name="..." route="/playlists/1" icon={<AudioLines />} />
           <MenuItem name="..." route="/playlists/2" icon={<AudioLines />} />
         </MenuItem>
       </div>
+      {isEditProfileOpen && (
+        <EditProfile isOpen={isEditProfileOpen} onClose={() => setIsEditProfileOpen(false)} /> // Render the EditProfile modal
+      )}
     </div>
   );
 };

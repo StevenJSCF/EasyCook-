@@ -33,4 +33,20 @@ export async function createUserProfile(userProfile: UserProfileParams) {
 }
 
 //UPDATE
+export async function updateUserProfile(userProfile: UserProfileParams) {
+  try {
+    await connectToDatabase();
+
+    console.log("this is the userprof id: " + userProfile.userId);
+    const updatedUserProfile = await Profile.findOneAndUpdate(
+      { userId: userProfile.userId },
+      userProfile,
+      { new: true }
+    );
+
+    return JSON.parse(JSON.stringify(updatedUserProfile));
+  } catch (error) {
+    handleError(error);
+  }
+}
 //DELETE

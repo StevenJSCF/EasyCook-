@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getAuth } from "@clerk/nextjs/server"
 import { getProfileById } from "@/lib/actions/profile-action"
 
-// /api/getProfile
+// /api/get-profile
 export async function GET(req: NextRequest, res: Response) {
 //   const { userId } = await useAuth()
 const { userId } = getAuth(req)
