@@ -7,6 +7,7 @@ import GeneratedRecipes from "./GeneratedRecipes";
 import { Button } from "./ui/button";
 import { HashLoader, PacmanLoader } from "react-spinners";
 import { ChevronRightIcon } from "lucide-react";
+import { UserProfileParams } from "@/lib/database/models/profile-model";
 
 type Props = {};
 
@@ -17,6 +18,13 @@ const IngredientsInput = (props: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
   const [recipe, setRecipe] = useState<string | null>(null); // State to store the generated recipe
+
+  const profile: UserProfileParams = {
+    userId: "",
+    allergies: "",
+    disliked_food: "",
+    cuisine_preference: "",
+  };
 
   const handleAddIngredient = (ingredient: string) => {
     if (ingredient.trim() && !ingredientsList.includes(ingredient)) {
@@ -50,6 +58,21 @@ const IngredientsInput = (props: Props) => {
     }
   };
 
+  const fetchProfile = async () => {
+    try {
+      const response = await axios.get("/api/get-profile");
+
+      profile.userId = response.data.userId;
+      profile.allergies = response.data.allergies;
+      profile.disliked_food = response.data.disliked_food;
+      profile.cuisine_preference = response.data.cuisine_preference;
+      return response.data; // Return profile data from the API
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const debounceFetch = setTimeout(fetchIngredients, 300);
     return () => clearTimeout(debounceFetch);
@@ -57,14 +80,20 @@ const IngredientsInput = (props: Props) => {
 
   const generateRecipe = async () => {
     setIsLoadingRecipe(true);
+
     try {
+      const profileData = await fetchProfile(); // Fetch profile data
+      if (!profileData) {
+        throw new Error("Failed to fetch profile");
+      }
+
+      // console.log("profileData: ", profileData);
       const response = await axios.post("/api/generate-recipe", {
         ingredients: ingredientsList,
+        profile: profile, // Use the fetched profile data
       });
 
       const ai_text_response = response.data.data.choices[0].text;
-      // Logging the entire response to understand its structure
-      console.log("API text Response:", ai_text_response);
       setIsLoadingRecipe(false);
 
       setRecipe(ai_text_response);
@@ -108,7 +137,7 @@ const IngredientsInput = (props: Props) => {
         <div className="flex flex-col flex-1 border-2 w-full border-gray-300 rounded-lg shadow-xl overflow-auto">
           <ul>
             {ingredientsList.map((item, index) => (
-              <p className="flex items-center m-2">
+              <p key={index} className="flex items-center m-2">
                 <ChevronRightIcon />
                 {item}
               </p>
