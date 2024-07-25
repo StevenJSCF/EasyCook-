@@ -8,6 +8,8 @@ import { Button } from "./ui/button";
 import { HashLoader, PacmanLoader } from "react-spinners";
 import { ChevronRightIcon } from "lucide-react";
 import { UserProfileParams } from "@/lib/database/models/profile-model";
+import toast from "react-hot-toast";
+import { useAuth } from "@clerk/nextjs";
 
 type Props = {};
 
@@ -25,6 +27,9 @@ const IngredientsInput = (props: Props) => {
     disliked_food: "",
     cuisine_preference: "",
   };
+
+  const { userId } = useAuth();
+  const isAuth = !!userId;
 
   const handleAddIngredient = (ingredient: string) => {
     if (ingredient.trim() && !ingredientsList.includes(ingredient)) {
@@ -79,29 +84,33 @@ const IngredientsInput = (props: Props) => {
   }, [ingredient]);
 
   const generateRecipe = async () => {
-    setIsLoadingRecipe(true);
+    if (!isAuth) {
+      toast.error("Please login to generate a recipe");
+    } else {
+      setIsLoadingRecipe(true);
 
-    try {
-      const profileData = await fetchProfile(); // Fetch profile data
-      if (!profileData) {
-        throw new Error("Failed to fetch profile");
+      try {
+        const profileData = await fetchProfile(); // Fetch profile data
+        if (!profileData) {
+          throw new Error("Failed to fetch profile");
+        }
+
+        // console.log("profileData: ", profileData);
+        const response = await axios.post("/api/generate-recipe", {
+          ingredients: ingredientsList,
+          profile: profile, // Use the fetched profile data
+        });
+
+        const ai_text_response = response.data.data.choices[0].text;
+        setIsLoadingRecipe(false);
+
+        setRecipe(ai_text_response);
+      } catch (error: any) {
+        console.error(
+          "Error generating recipe:",
+          error.response?.data || error.message
+        );
       }
-
-      // console.log("profileData: ", profileData);
-      const response = await axios.post("/api/generate-recipe", {
-        ingredients: ingredientsList,
-        profile: profile, // Use the fetched profile data
-      });
-
-      const ai_text_response = response.data.data.choices[0].text;
-      setIsLoadingRecipe(false);
-
-      setRecipe(ai_text_response);
-    } catch (error: any) {
-      console.error(
-        "Error generating recipe:",
-        error.response?.data || error.message
-      );
     }
   };
 
@@ -161,10 +170,14 @@ const IngredientsInput = (props: Props) => {
       </div>
       <div className="flex flex-col min-h-screen w-full px-5 py-5">
         <div className="flex flex-col flex-1 border-2 w-full border-gray-300 rounded-lg shadow-xl">
-          <h2 className="text-center text-4xl font-bold">Generated Recipes:</h2>
           {isLoadingRecipe ? (
-            <div className="flex items-center justify-center flex-1">
-              <PacmanLoader size={90} />
+            <div className="flex flex-col items-center justify-center flex-1">
+              <h2 className="text-center text-4xl font-bold mb-4">
+                Generating recipes please wait
+              </h2>
+              <div className="flex items-center justify-center flex-1">
+                <PacmanLoader size={90} />
+              </div>
             </div>
           ) : recipe ? (
             <GeneratedRecipes recipe={recipe} />

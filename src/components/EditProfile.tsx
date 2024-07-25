@@ -1,5 +1,3 @@
-// components/EditProfile.tsx
-
 "use client";
 
 import { useEffect, useState, FC } from "react";
@@ -38,7 +36,7 @@ const EditProfile: FC<EditProfileProps> = ({ isOpen, onClose }) => {
         setAllergies(allergies);
         setCuisinePreference(cuisine_preference);
       } catch (error) {
-        toast.error("Failed to fetch user data.");
+        handleError(error);
       } finally {
         setLoading(false);
       }
@@ -48,8 +46,8 @@ const EditProfile: FC<EditProfileProps> = ({ isOpen, onClose }) => {
 
   async function onSumit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); // Prevents the default form submission behavior
-    
-      const values = {
+
+    const values = {
       userId: userId,
       disliked_food: dislikedFood,
       allergies: allergies,
@@ -60,7 +58,11 @@ const EditProfile: FC<EditProfileProps> = ({ isOpen, onClose }) => {
       const response = await axios.put("/api/update-profile", {
         userProfile: values,
       });
-      toast.success("Profile updted successfully");
+      if (!isAuth) {
+        toast.error("Please login to update your profile");
+      } else {
+        toast.success("Profile updated successfully");
+      }
     } catch (error) {
       console.log("error creating the user profile", error);
       handleError(error);
@@ -83,41 +85,45 @@ const EditProfile: FC<EditProfileProps> = ({ isOpen, onClose }) => {
         <p className="text-center font-semibold mb-6">
           Let's make your culinary experience unique and enjoyable!
         </p>
-        <form onSubmit={onSumit} className="space-y-4">
-          <div className="flex flex-col">
-            <label className="mb-1 font-semibold">Disliked food:</label>
-            <input
-              className="p-2 border border-gray-300 rounded"
-              value={dislikedFood}
-              onChange={(e) => setDislikedFood(e.target.value)}
-              placeholder="e.g., tuna, olive, ..."
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="mb-1 font-semibold">Allergies:</label>
-            <input
-              className="p-2 border border-gray-300 rounded"
-              value={allergies}
-              onChange={(e) => setAllergies(e.target.value)}
-              placeholder="e.g., seafood, ..."
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="mb-1 font-semibold">Cuisine Preference:</label>
-            <input
-              className="p-2 border border-gray-300 rounded"
-              value={cuisinePreference}
-              onChange={(e) => setCuisinePreference(e.target.value)}
-              placeholder="e.g., Chinese, Italian, ..."
-            />
-          </div>
-          <Button
-            type="submit"
-            className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Update Profile
-          </Button>
-        </form>
+        {loading ? (
+          <div className="text-center">Loading...</div>
+        ) : (
+          <form onSubmit={onSumit} className="space-y-4">
+            <div className="flex flex-col">
+              <label className="mb-1 font-semibold">Disliked food:</label>
+              <input
+                className="p-2 border border-gray-300 rounded"
+                value={dislikedFood}
+                onChange={(e) => setDislikedFood(e.target.value)}
+                placeholder="e.g., tuna, olive, ..."
+              />
+            </div>
+            <div className="flex flex-col">
+              <label className="mb-1 font-semibold">Allergies:</label>
+              <input
+                className="p-2 border border-gray-300 rounded"
+                value={allergies}
+                onChange={(e) => setAllergies(e.target.value)}
+                placeholder="e.g., seafood, ..."
+              />
+            </div>
+            <div className="flex flex-col">
+              <label className="mb-1 font-semibold">Cuisine Preference:</label>
+              <input
+                className="p-2 border border-gray-300 rounded"
+                value={cuisinePreference}
+                onChange={(e) => setCuisinePreference(e.target.value)}
+                placeholder="e.g., Chinese, Italian, ..."
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Update Profile
+            </Button>
+          </form>
+        )}
       </div>
     </Modal>
   );

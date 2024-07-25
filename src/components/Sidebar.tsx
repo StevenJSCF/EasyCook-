@@ -19,6 +19,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import FirstLogin from "@/components/FirstLogin";
 import EditProfile from "./EditProfile"; // Import the EditProfile component
+import { handleError } from "@/lib/utils";
 
 // Define prop types for MenuItem component
 interface MenuItemProps {
@@ -86,7 +87,7 @@ const Sidebar: FC = () => {
         const response = await axios.get("/api/get-profile");
         setProfile(response.data);
       } catch (error) {
-        toast.error("Failed to fetch user data.");
+        handleError(error);
       } finally {
         setLoading(false);
       }
@@ -139,7 +140,10 @@ const Sidebar: FC = () => {
         </MenuItem>
       </div>
       {isEditProfileOpen && (
-        <EditProfile isOpen={isEditProfileOpen} onClose={() => setIsEditProfileOpen(false)} /> // Render the EditProfile modal
+        <EditProfile
+          isOpen={isEditProfileOpen}
+          onClose={() => setIsEditProfileOpen(false)}
+        /> // Render the EditProfile modal
       )}
     </div>
   );

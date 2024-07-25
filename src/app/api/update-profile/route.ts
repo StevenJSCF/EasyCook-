@@ -1,6 +1,8 @@
 import { updateUserProfile } from "@/lib/actions/profile-action";
 import { NextRequest, NextResponse } from "next/server";
 import { handleError } from "@/lib/utils";
+import { getAuth } from "@clerk/nextjs/server";
+import toast from "react-hot-toast";
 
 export async function PUT(req: NextRequest, res: NextResponse) {
   try {
