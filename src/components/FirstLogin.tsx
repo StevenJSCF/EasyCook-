@@ -52,7 +52,7 @@ const FirstLogin = () => {
           accurate recipes just for you.
         </p>
         <p className="text-center font-semibold mb-6">
-          Let's make your culinary experience unique and enjoyable!
+          Let&apos;s make your culinary experience unique and enjoyable!
         </p>
         <form onSubmit={onSumit} className="space-y-4">
           <div className="flex flex-col">

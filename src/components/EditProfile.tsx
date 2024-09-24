@@ -83,7 +83,7 @@ const EditProfile: FC<EditProfileProps> = ({ isOpen, onClose }) => {
           accurate recipes just for you.
         </p>
         <p className="text-center font-semibold mb-6">
-          Let's make your culinary experience unique and enjoyable!
+          Let&apos;s make your culinary experience unique and enjoyable!
         </p>
         {loading ? (
           <div className="text-center">Loading...</div>
